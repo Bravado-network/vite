@@ -27,7 +27,7 @@ export async function transformMain(
   ssr: boolean,
   asCustomElement: boolean
 ) {
-  const { devServer, isProduction } = options
+  const { devServer, isProduction, devToolsEnabled } = options
 
   // prev descriptor is only set and used for hmr
   const prevDescriptor = getPrevDescriptor(filename)
@@ -102,7 +102,7 @@ export async function transformMain(
   if (hasScoped) {
     attachedProps.push([`__scopeId`, JSON.stringify(`data-v-${descriptor.id}`)])
   }
-  if (devServer && !isProduction) {
+  if (devToolsEnabled || (devServer && !isProduction)) {
     // expose filename during serve for devtools to pickup
     attachedProps.push([`__file`, JSON.stringify(filename)])
   }
@@ -269,9 +269,7 @@ async function genScriptCode(
       scriptCode = compiler.rewriteDefault(
         script.content,
         '_sfc_main',
-        script.lang === 'ts'
-          ? ['typescript']
-          : undefined
+        script.lang === 'ts' ? ['typescript'] : undefined
       )
       map = script.map
     } else {
